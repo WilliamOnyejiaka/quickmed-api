@@ -60,7 +60,7 @@ def sign_up():
     if User.get_user_by_username(username):
         return jsonify({
             'error': True,
-            'message': "email already exists"
+            'message': "username already exists"
         }), 400
         
     password_hash = generate_password_hash(password)
