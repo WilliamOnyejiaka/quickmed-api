@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify,request
 from typing import Dict
 import validators
 import phonenumbers
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash,check_password_hash
 from src.api.models.User import User
 
 
@@ -83,17 +83,90 @@ def sign_up():
         'error': True,
         'message': "something went wrong"
     }), 500
-    
-    
-    #     if Admin.get_admin_by_email(email):
-    #         return jsonify({
-    #             'error': True,
-    #             'message': "email already exists"
-    #         }), 400
+
+@auth.get('/login/username')
+def username_login():
+    username = request.authorization.get('username',None)
+    password = request.authorization.get('password',None)
+
+    if not username and not password:
+        return jsonify({
+            'error':True,
+            'message':"email and password are needed"
+        }),400
         
+    current_user = User.get_user_by_username(username.strip())
+
+    if current_user:
+        valid_password = check_password_hash(current_user['password'],password)
+        if valid_password:
+            
+            data = {
+                '_id': current_user['_id'],
+                'first_name': current_user['first_name'],
+                'email': current_user['email'],
+                'last_name': current_user['last_name'],
+                'username': current_user['username'],
+                'created_at': current_user['created_at'],
+                'updated_at': current_user['updated_at']
+            }
+
+            return jsonify({
+                'error': False,
+                'message': "logged in successfully",
+                'data': data,
+            }),200
+        
+        return jsonify({
+            'error': True,
+            'message': "invalid password"
+        }),400
     
-    # return jsonify({
-    #     'error': True,
-    #     'message': "bingo",
-    #     'data': phonenumbers.is_valid_number(my_number)
-    # }),200
+    return jsonify({
+        'error':True,
+        'message':"user does not exists"
+    }),404
+
+
+@auth.get('/login/email')
+def email_login():
+    email = request.authorization.get('username',None)
+    password = request.authorization.get('password',None)
+
+    if not email and not password:
+        return jsonify({
+            'error':True,
+            'message':"email and password are needed"
+        }),400
+        
+    current_user = User.get_user_by_email(email.strip())
+
+    if current_user:
+        valid_password = check_password_hash(current_user['password'],password)
+        if valid_password:
+            
+            data = {
+                '_id': current_user['_id'],
+                'first_name': current_user['first_name'],
+                'email': current_user['email'],
+                'last_name': current_user['last_name'],
+                'username': current_user['username'],
+                'created_at': current_user['created_at'],
+                'updated_at': current_user['updated_at']
+            }
+
+            return jsonify({
+                'error': False,
+                'message': "logged in successfully",
+                'data': data,
+            }),200
+        
+        return jsonify({
+            'error': True,
+            'message': "invalid password"
+        }),400
+    
+    return jsonify({
+        'error':True,
+        'message':"user does not exists"
+    }),404
