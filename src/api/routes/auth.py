@@ -57,7 +57,7 @@ def sign_up():
             'message': "email already exists"
         }), 400
     
-    if User.get_user_by_username(email):
+    if User.get_user_by_username(username):
         return jsonify({
             'error': True,
             'message': "email already exists"
